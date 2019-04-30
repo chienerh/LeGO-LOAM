@@ -180,6 +180,8 @@ public:
 
     void laserOdometryHandler(const nav_msgs::Odometry::ConstPtr& laserOdometry)
     {
+        // std::cout << "laserOdometryHandler time, " << ros::Time::now() << ", ";
+        
         currentHeader = laserOdometry->header;
 
         double roll, pitch, yaw;
@@ -193,6 +195,8 @@ public:
         transformSum[3] = laserOdometry->pose.pose.position.x;
         transformSum[4] = laserOdometry->pose.pose.position.y;
         transformSum[5] = laserOdometry->pose.pose.position.z;
+
+        std::cout << ros::Time::now() << ", " << transformSum[3] << ", " << transformSum[4] << ", " << transformSum[5] << std::endl;
 
         transformAssociateToMap();
 
@@ -213,6 +217,8 @@ public:
         laserOdometryTrans2.setRotation(tf::Quaternion(-geoQuat.y, -geoQuat.z, geoQuat.x, geoQuat.w));
         laserOdometryTrans2.setOrigin(tf::Vector3(transformMapped[3], transformMapped[4], transformMapped[5]));
         tfBroadcaster2.sendTransform(laserOdometryTrans2);
+
+        // std::cout << ros::Time::now() << std::endl;
     }
 
     void odomAftMappedHandler(const nav_msgs::Odometry::ConstPtr& odomAftMapped)

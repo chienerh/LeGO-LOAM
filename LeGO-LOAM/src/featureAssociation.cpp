@@ -428,7 +428,8 @@ public:
 
         imuPointerLast = (imuPointerLast + 1) % imuQueLength;
 
-        imuTime[imuPointerLast] = imuIn->header.stamp.toSec();
+        // imuTime[imuPointerLast] = imuIn->header.stamp.toSec();
+        imuTime[imuPointerLast] = ros::Time::now().toSec();
 
         imuRoll[imuPointerLast] = roll;
         imuPitch[imuPointerLast] = pitch;
@@ -446,33 +447,40 @@ public:
     }
 
     void laserCloudHandler(const sensor_msgs::PointCloud2ConstPtr& laserCloudMsg){
-
+        // std::cout << "laserCloudHandler time, " << ros::Time::now() << ", ";
         cloudHeader = laserCloudMsg->header;
-
+        // cloudHeader.stamp = ros::Time::now();
         timeScanCur = cloudHeader.stamp.toSec();
+        // std::cout << "cloudHeader.stamp2 " << cloudHeader.stamp << std::endl;
         timeNewSegmentedCloud = timeScanCur;
 
         segmentedCloud->clear();
         pcl::fromROSMsg(*laserCloudMsg, *segmentedCloud);
 
         newSegmentedCloud = true;
+        // std::cout << ros::Time::now() << std::endl;
     }
 
     void outlierCloudHandler(const sensor_msgs::PointCloud2ConstPtr& msgIn){
-
+        // std::cout << "outlierCloudHandler time, " << ros::Time::now() << ", ";
         timeNewOutlierCloud = msgIn->header.stamp.toSec();
+        // timeNewOutlierCloud = ros::Time::now().toSec();
 
         outlierCloud->clear();
         pcl::fromROSMsg(*msgIn, *outlierCloud);
 
         newOutlierCloud = true;
+        // std::cout << ros::Time::now() << std::endl;
     }
 
     void laserCloudInfoHandler(const cloud_msgs::cloud_infoConstPtr& msgIn)
     {
+        // std::cout << "laserCloudInfoHandler time, " << ros::Time::now() << ", ";
         timeNewSegmentedCloudInfo = msgIn->header.stamp.toSec();
+        // timeNewSegmentedCloudInfo = ros::Time::now().toSec();
         segInfo = *msgIn;
         newSegmentedCloudInfo = true;
+        // std::cout << ros::Time::now() << std::endl;
     }
 
     void adjustDistortion()
@@ -846,7 +854,8 @@ public:
 
     void TransformToStart(PointType const * const pi, PointType * const po)
     {
-        float s = 10 * (pi->intensity - int(pi->intensity));
+        float s = 1;
+        // float s = 10 * (pi->intensity - int(pi->intensity));
 
         float rx = s * transformCur[0];
         float ry = s * transformCur[1];
@@ -1749,13 +1758,13 @@ public:
 
         int cornerPointsLessSharpNum = cornerPointsLessSharp->points.size();
         for (int i = 0; i < cornerPointsLessSharpNum; i++) {
-            TransformToEnd(&cornerPointsLessSharp->points[i], &cornerPointsLessSharp->points[i]);
+            // TransformToEnd(&cornerPointsLessSharp->points[i], &cornerPointsLessSharp->points[i]);
         }
 
 
         int surfPointsLessFlatNum = surfPointsLessFlat->points.size();
         for (int i = 0; i < surfPointsLessFlatNum; i++) {
-            TransformToEnd(&surfPointsLessFlat->points[i], &surfPointsLessFlat->points[i]);
+            // TransformToEnd(&surfPointsLessFlat->points[i], &surfPointsLessFlat->points[i]);
         }
 
         pcl::PointCloud<PointType>::Ptr laserCloudTemp = cornerPointsLessSharp;
@@ -1803,7 +1812,7 @@ public:
 
     void runFeatureAssociation()
     {
-
+        
         if (newSegmentedCloud && newSegmentedCloudInfo && newOutlierCloud &&
             std::abs(timeNewSegmentedCloudInfo - timeNewSegmentedCloud) < 0.05 &&
             std::abs(timeNewOutlierCloud - timeNewSegmentedCloud) < 0.05){
@@ -1814,6 +1823,7 @@ public:
         }else{
             return;
         }
+        // std::cout << "FeatureAssociation time, " << ros::Time::now() << ", ";
 
         adjustDistortion();
 
@@ -1839,6 +1849,8 @@ public:
         publishOdometry();
 
         publishCloudsLast();   
+
+        // std::cout << ros::Time::now() << std::endl;
     }
 };
 

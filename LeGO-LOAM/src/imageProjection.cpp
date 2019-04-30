@@ -156,11 +156,13 @@ public:
     void copyPointCloud(const sensor_msgs::PointCloud2ConstPtr& laserCloudMsg){
 
         cloudHeader = laserCloudMsg->header;
+        cloudHeader.stamp = ros::Time::now();
+        // std::cout << "cloudHeader.stamp " << cloudHeader.stamp << std::endl;
         pcl::fromROSMsg(*laserCloudMsg, *laserCloudIn);
     }
     
     void cloudHandler(const sensor_msgs::PointCloud2ConstPtr& laserCloudMsg){
-
+        // std::cout << "cloudHandler time, " << ros::Time::now() << ", ";
         copyPointCloud(laserCloudMsg);
         findStartEndAngle();
         projectPointCloud();
@@ -168,6 +170,7 @@ public:
         cloudSegmentation();
         publishCloud();
         resetParameters();
+        // std::cout << ros::Time::now() << std::endl;
     }
 
     void findStartEndAngle(){

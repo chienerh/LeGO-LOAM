@@ -611,6 +611,7 @@ public:
 
     void laserCloudCornerLastHandler(const sensor_msgs::PointCloud2ConstPtr& msg){
         timeLaserCloudCornerLast = msg->header.stamp.toSec();
+        // std::cout << "timeLaserCloudCornerLast " << timeLaserCloudCornerLast << std::endl;
         laserCloudCornerLast->clear();
         pcl::fromROSMsg(*msg, *laserCloudCornerLast);
         newLaserCloudCornerLast = true;
@@ -625,6 +626,7 @@ public:
 
     void laserOdometryHandler(const nav_msgs::Odometry::ConstPtr& laserOdometry){
         timeLaserOdometry = laserOdometry->header.stamp.toSec();
+        // timeLaserOdometry = ros::Time::now ().toSec();
         double roll, pitch, yaw;
         geometry_msgs::Quaternion geoQuat = laserOdometry->pose.pose.orientation;
         tf::Matrix3x3(tf::Quaternion(geoQuat.z, -geoQuat.x, -geoQuat.y, geoQuat.w)).getRPY(roll, pitch, yaw);
@@ -704,9 +706,10 @@ public:
 
     void publishGlobalMap(){
 
-        if (pubLaserCloudSurround.getNumSubscribers() == 0)
+        if (pubLaserCloudSurround.getNumSubscribers() == 0){
+            std::cout << "pubLaserCloudSurround.getNumSubscribers() == 0" << std::endl;
             return;
-
+        }
         if (cloudKeyPoses3D->points.empty() == true)
             return;
 
@@ -1415,6 +1418,8 @@ public:
 
     void run(){
 
+        // std::cout << "Map time, " << ros::Time::now() << ", ";
+
         if (newLaserCloudCornerLast  && std::abs(timeLaserCloudCornerLast  - timeLaserOdometry) < 0.005 &&
             newLaserCloudSurfLast    && std::abs(timeLaserCloudSurfLast    - timeLaserOdometry) < 0.005 &&
             newLaserCloudOutlierLast && std::abs(timeLaserCloudOutlierLast - timeLaserOdometry) < 0.005 &&
@@ -1448,6 +1453,7 @@ public:
                 clearCloud();
             }
         }
+        // std::cout << ros::Time::now() << std::endl;
     }
 };
 
